@@ -1,14 +1,20 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const http = require('http');
 
-// 1. ESTO ES LO QUE MANTIENE EL BOT VIVO EN RENDER
+// CONFIGURACIÓN DEL PUERTO PARA RENDER
+const PORT = process.env.PORT || 10000;
+
+// SERVIDOR WEB OBLIGATORIO PARA MANTENER EL PROCESO VIVO
 const server = http.createServer((req, res) => {
     res.writeHead(200);
     res.end('Bot activo');
 });
-server.listen(process.env.PORT || 10000);
 
-// 2. CONFIGURACIÓN DEL BOT
+server.listen(PORT, '0.0.0.0', () => {
+    console.log(`Servidor web escuchando en el puerto ${PORT}`);
+});
+
+// CONFIGURACIÓN DEL BOT
 const client = new Client({ 
     intents: [
         GatewayIntentBits.Guilds, 
@@ -42,5 +48,5 @@ client.on('messageCreate', (message) => {
     }
 });
 
-// 3. INICIO DEL BOT (asegúrate de que tu variable en Render se llame TOKEN)
+// INICIO DEL BOT
 client.login(process.env.TOKEN);
