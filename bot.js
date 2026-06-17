@@ -1,4 +1,6 @@
 const { Client, GatewayIntentBits } = require('discord.js');
+const http = require('http');
+
 const client = new Client({ 
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] 
 });
@@ -7,10 +9,11 @@ client.once('ready', () => {
     console.log('¡El bot ya está despierto y listo!');
 });
 
-// Esto mantiene al bot activo enviando un log cada 5 minutos
+// ESTO MANTIENE AL BOT VIVO (Auto-Ping)
 setInterval(() => {
-    console.log('Bot activo y manteniendo conexión...');
-}, 300000);
+    http.get('http://recordadordedowns.onrender.com'); 
+    console.log('Auto-ping realizado para evitar inactividad.');
+}, 240000); // Cada 4 minutos
 
 client.on('messageCreate', (message) => {
     if (message.author.bot) return;
@@ -35,12 +38,10 @@ client.on('messageCreate', (message) => {
     }
 });
 
-const http = require('http');
 const PORT = process.env.PORT || 3000;
 http.createServer((req, res) => {
-    res.writeHead(200, {'Content-Type': 'text/plain'});
-    res.write('Bot en linea');
-    res.end();
+    res.writeHead(200);
+    res.end('Bot activo');
 }).listen(PORT);
 
 client.login(process.env.TOKEN);
