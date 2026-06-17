@@ -1,12 +1,7 @@
 const { Client, GatewayIntentBits } = require('discord.js');
-require('dotenv').config({ path: './config.txt' });
-
+// IMPORTANTE: Ya no usaremos config.txt, usaremos las variables que pusiste en Render
 const client = new Client({ 
-    intents: [
-        GatewayIntentBits.Guilds, 
-        GatewayIntentBits.GuildMessages, 
-        GatewayIntentBits.MessageContent
-    ] 
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] 
 });
 
 client.once('ready', () => {
@@ -15,40 +10,33 @@ client.once('ready', () => {
 
 client.on('messageCreate', (message) => {
     if (message.author.bot) return;
-
     const texto = message.content.toLowerCase().trim();
 
-    // COMANDO 1
     if (texto === 'resumendown') {
         message.reply('En 1 hora te aviso, si no estas te violo');
         const usuarioId = message.author.id;
-        const frases = [
-            "Rota resumen down",
-            "Te gusta mucho el resumen o que",
-            "Rotalo ya idiota",
-            "Cuando quieras lo rotas, tienes todo el tiempo del mundo"
-        ];
         setTimeout(() => {
-            const frase = frases[Math.floor(Math.random() * frases.length)];
-            message.channel.send(`<@${usuarioId}> ${frase}`);
-        }, 1 * 60 * 60 * 1000); 
+            message.channel.send(`<@${usuarioId}> ¡Es hora del resumen!`);
+        }, 3600000); 
     }
 
-    // COMANDO 2
     if (texto === 'pruebadown') {
         message.reply('Prueba iniciada, te aviso en 30 segundos...');
         const usuarioId = message.author.id;
         setTimeout(() => {
             message.channel.send(`<@${usuarioId}> ¡La prueba de 30 segundos ha terminado!`);
-        }, 30 * 1000);
+        }, 30000);
     }
 });
 
-// Servidor para Render
+// ESTO ES LO QUE ARREGLA EL ERROR DE "NO OPEN PORTS"
 const http = require('http');
+const PORT = process.env.PORT || 3000;
 http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Bot activo');
-}).listen(process.env.PORT || 3000);
+  res.write('Bot activo');
+  res.end();
+}).listen(PORT, () => {
+  console.log('Servidor web escuchando en el puerto ' + PORT);
+});
 
 client.login(process.env.TOKEN);
