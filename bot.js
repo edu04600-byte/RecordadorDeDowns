@@ -6,33 +6,33 @@ const client = new Client({
 });
 
 client.once('ready', () => {
-    console.log('¡El bot ya está despierto y listo!');
-});
-
-// Forzar reconexión si el bot se queda mudo
-client.on('error', (error) => {
-    console.error('Error detectado, intentando reconectar...', error);
-    client.login(process.env.TOKEN);
+    console.log('Bot conectado y escuchando...');
 });
 
 client.on('messageCreate', (message) => {
     if (message.author.bot) return;
-    const texto = message.content.toLowerCase().trim();
+    
+    const cmd = message.content.toLowerCase().trim();
 
-    if (texto === 'pruebadown') {
-        message.reply('Prueba iniciada, te aviso en 30 segundos...');
-        const channel = message.channel;
-        const userId = message.author.id;
+    if (cmd === 'resumendown') {
+        message.reply('En 1 hora te aviso, si no estas te violo');
         setTimeout(() => {
-            channel.send(`<@${userId}> ¡La prueba de 30 segundos ha terminado!`).catch(console.error);
-        }, 30000);
+            message.channel.send(`<@${message.author.id}> ¡Es hora del resumen!`);
+        }, 3600000); // 1 hora
+    }
+
+    if (cmd === 'pruebadown') {
+        message.reply('Prueba iniciada, te aviso en 30 segundos...');
+        setTimeout(() => {
+            message.channel.send(`<@${message.author.id}> ¡La prueba de 30 segundos ha terminado!`);
+        }, 30000); // 30 segundos
     }
 });
 
+// Servidor web para que Render no se queje
 const PORT = process.env.PORT || 3000;
 http.createServer((req, res) => {
-    res.writeHead(200);
-    res.end('Bot activo');
+    res.end('OK');
 }).listen(PORT);
 
 client.login(process.env.TOKEN);
