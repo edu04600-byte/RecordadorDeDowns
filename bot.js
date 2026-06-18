@@ -46,8 +46,8 @@ client.on('messageCreate', (message) => {
             message.channel.send(`<@${message.author.id}> ¡La prueba de 30 segundos ha terminado!`);
         }, 30000); 
     }
-});
-// NUEVO COMANDO POSTULADO
+
+    // COMANDO POSTULAR (Ahora está dentro de la función, donde debe estar)
     if (cmd === 'postular') {
         message.reply(`Estas son unas preguntas que los moderadores decidimos saber antes de que quieras formar parte de esta moderación.
 
@@ -67,9 +67,9 @@ client.on('messageCreate', (message) => {
 
 -8: Si estas tu solo moderando el chat y varios usuarios comienzan a decir comentarios racistas, machistas e insultos hacía xParga, stremears, players, etc... ¿Cómo retomarías el control del chat, que acciones tomarías en contra de los responsables y como harías para que no se vuelva a repetir?
 
-[Esto es mas un aviso que otra cosa, al adjuntar tu cuenta de Twitch y Kick, revisaremos la actividad que tienes, esto quiere decir que si tienes 3 mensajes y no eres tan activo en el canal bajan mas las probabilidades de entrar en la moderación, esto no quiere decir que no puedas pero la actividad se toma mucho en cuenta] 
-`);
+[Esto es mas un aviso que otra cosa, al adjuntar tu cuenta de Twitch y Kick, revisaremos la actividad que tienes, esto quiere decir que si tienes 3 mensajes y no eres tan activo en el canal bajan mas las probabilidades de entrar en la moderación, esto no quiere decir que no puedas pero la actividad se toma mucho en cuenta]`);
     }
+}); // <--- AQUÍ SE CIERRA EL client.on
 
 // INICIO DEL BOT
 client.login(process.env.TOKEN);
