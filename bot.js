@@ -71,7 +71,7 @@ client.on('messageCreate', (message) => {
     }
 
     // --- NUEVO COMANDO ADJUNTAR (AQUÍ ESTÁ BIEN PUESTO) ---
-    if (cmd === 'adjuntar') {
+    if (cmd === 'ya esta') {
         message.reply(`🔴Gracias por postular los resultados se darán los próximos días por el canal de ⁠📢┃𝐀𝐧𝐮𝐧𝐜𝐢𝐨𝐬 🔴
 `);
     }
