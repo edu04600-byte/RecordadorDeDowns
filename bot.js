@@ -47,6 +47,29 @@ client.on('messageCreate', (message) => {
         }, 30000); 
     }
 });
+// NUEVO COMANDO POSTULADO
+    if (cmd === 'postular') {
+        message.reply(`Estas son unas preguntas que los moderadores decidimos saber antes de que quieras formar parte de esta moderación.
+
+-1: ¿Qué edad tienes?
+
+-2: ¿Qué te motiva a querer formar parte del equipo de moderación de este canal en particular?
+
+-3: ¿Tienes experiencia previa como moderador en Twitch u otras plataformas similares? Si la respuesta es ¨si¨, en que canales has moderado?
+
+-4: ¿Cómo manejarías las críticas o quejas de los espectadores sobre las decisiones de moderación tomadas por ti o por otros moderadores?
+
+-5: ¿Dispones de PC?
+
+-6: Adjunta nombre de usuario de Twitch y Kick.
+
+-7: ¿Dispones de todo el stream para moderar? 
+
+-8: Si estas tu solo moderando el chat y varios usuarios comienzan a decir comentarios racistas, machistas e insultos hacía xParga, stremears, players, etc... ¿Cómo retomarías el control del chat, que acciones tomarías en contra de los responsables y como harías para que no se vuelva a repetir?
+
+[Esto es mas un aviso que otra cosa, al adjuntar tu cuenta de Twitch y Kick, revisaremos la actividad que tienes, esto quiere decir que si tienes 3 mensajes y no eres tan activo en el canal bajan mas las probabilidades de entrar en la moderación, esto no quiere decir que no puedas pero la actividad se toma mucho en cuenta] 
+`);
+    }
 
 // INICIO DEL BOT
 client.login(process.env.TOKEN);
