@@ -47,7 +47,7 @@ client.on('messageCreate', (message) => {
         }, 30000); 
     }
 
-    // COMANDO POSTULAR (Ahora está dentro de la función, donde debe estar)
+    // COMANDO POSTULAR
     if (cmd === 'postular') {
         message.reply(`Estas son unas preguntas que los moderadores decidimos saber antes de que quieras formar parte de esta moderación.
 
@@ -69,7 +69,15 @@ client.on('messageCreate', (message) => {
 
 [Esto es mas un aviso que otra cosa, al adjuntar tu cuenta de Twitch y Kick, revisaremos la actividad que tienes, esto quiere decir que si tienes 3 mensajes y no eres tan activo en el canal bajan mas las probabilidades de entrar en la moderación, esto no quiere decir que no puedas pero la actividad se toma mucho en cuenta]`);
     }
-}); // <--- AQUÍ SE CIERRA EL client.on
+
+    // --- NUEVO COMANDO ADJUNTAR (AQUÍ ESTÁ BIEN PUESTO) ---
+    if (cmd === 'adjuntar') {
+        message.reply(`🔴Gracias por postular los resultados se darán los próximos días por el canal de ⁠📢┃𝐀𝐧𝐮𝐧𝐜𝐢𝐨𝐬 🔴
+`);
+    }
+    // ------------------------------------------------------
+
+}); // Cierre correcto de client.on
 
 // INICIO DEL BOT
 client.login(process.env.TOKEN);
