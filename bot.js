@@ -65,18 +65,25 @@ client.on('messageCreate', (message) => {
 
 -7: ¿Dispones de todo el stream para moderar? 
 
--8: Si estas tu solo moderando el chat y varios usuarios comienzan a decir comentarios racistas, machistas e insultos hacía xParga, stremears, players, etc... ¿Cómo retomarías el control del chat, que acciones tomarías en contra de los responsables y como harías para que no se vuelva a repetir?
+-8: Si estas tu solo moderando el chat y varios usuarios comenzaron a decir comentarios racistas, machistas e insultos hacía xParga, stremears, players, etc... ¿Cómo retomarías el control del chat, que acciones tomarías en contra de los responsables y como harías para que no se vuelva a repetir?
 
 [Esto es mas un aviso que otra cosa, al adjuntar tu cuenta de Twitch y Kick, revisaremos la actividad que tienes, esto quiere decir que si tienes 3 mensajes y no eres tan activo en el canal bajan mas las probabilidades de entrar en la moderación, esto no quiere decir que no puedas pero la actividad se toma mucho en cuenta]
 **Cuando respondas todas las preguntas escribe "ya esta"**`);
     }
 
-    // --- NUEVO COMANDO ADJUNTAR (AQUÍ ESTÁ BIEN PUESTO) ---
+    // --- COMANDOS DE CIERRE ---
+    
+    // 1. Sin acento
     if (cmd === 'ya esta') {
-        message.reply(`🔴Gracias por postular los resultados se darán los próximos días por el canal de ⁠📢┃𝐀𝐧𝐮𝐧𝐜𝐢𝐨𝐬 🔴
-`);
+        message.reply(`🔴Gracias por postular los resultados se darán los próximos días por el canal de ⁠📢┃𝐀𝐧𝐮𝐧𝐜𝐢𝐨s 🔴`);
     }
-    // ------------------------------------------------------
+
+    // 2. Con acento
+    if (cmd === 'ya está') {
+        message.reply(`🔴Gracias por postular los resultados se darán los próximos días por el canal de ⁠📢┃𝐀𝐧𝐮𝐧𝐜𝐢𝐨s 🔴`);
+    }
+    
+    // --------------------------
 
 }); // Cierre correcto de client.on
 
