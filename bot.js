@@ -36,7 +36,7 @@ client.on('messageCreate', (message) => {
     if (cmd === 'resumendown') {
         message.reply('En 1 hora te aviso, si no estas te violo');
         setTimeout(() => {
-            message.channel.send(`<@${message.author.id}> ¡Es hora del resumen!`);
+            message.channel.send(`<@${message.author.id}> Rota el resumen nigga`);
         }, 3600000); 
     }
 
