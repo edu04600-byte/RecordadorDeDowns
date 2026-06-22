@@ -33,11 +33,12 @@ client.on('messageCreate', (message) => {
     
     const cmd = message.content.toLowerCase().trim();
 
+    // COMANDO RESUMENDOWN (Actualizado a 1 hora y 15 minutos)
     if (cmd === 'resumendown') {
-        message.reply('En 1 hora te aviso, si no estas te violo');
+        message.reply('En 1 hora y 15 minutos te aviso, si no estas te violo');
         setTimeout(() => {
             message.channel.send(`<@${message.author.id}> Rota el resumen nigga`);
-        }, 3600000); 
+        }, 4500000); // 4,500,000 ms = 1h y 15m
     }
 
     if (cmd === 'pruebadown') {
