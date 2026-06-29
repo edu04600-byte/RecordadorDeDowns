@@ -75,14 +75,10 @@ client.on('messageCreate', (message) => {
     // --- COMANDOS DE CIERRE ---
     
     // 1. Sin acento
-    if (cmd === 'ya esta') {
+    if (cmd === 'postule') {
         message.reply(`🔴Gracias por postular los resultados se darán los próximos días por el canal de ⁠📢┃𝐀𝐧𝐮𝐧𝐜𝐢𝐨s 🔴`);
     }
 
-    // 2. Con acento
-    if (cmd === 'ya está') {
-        message.reply(`🔴Gracias por postular los resultados se darán los próximos días por el canal de ⁠📢┃𝐀𝐧𝐮𝐧𝐜𝐢𝐨s 🔴`);
-    }
     
     // --------------------------
 
