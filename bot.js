@@ -33,15 +33,14 @@ client.on('messageCreate', (message) => {
     
     const cmd = message.content.toLowerCase().trim();
 
-    // COMANDO RESUMENDOWN (Fijado exactamente a 1 hora)
+    // COMANDO RESUMENDOWN (Actualizado a 1 hora exacta)
     if (cmd === 'resumedown') {
         message.reply('En 1 hora te aviso, si no estas te violo');
         setTimeout(() => {
             message.channel.send(`<@${message.author.id}> Rota el resumen nigga`);
-        }, 3600000); // 3,600,000 ms = 1 hora exacta
+        }, 3600000); // 3,600,000 ms = 1 hora
     }
 
-    // COMANDO PRUEBADOWN
     if (cmd === 'pruebadown') {
         message.reply('Prueba iniciada, te aviso en 30 segundos...');
         setTimeout(() => {
@@ -73,12 +72,16 @@ client.on('messageCreate', (message) => {
 **Cuando respondas todas las preguntas escribe "ya esta"**`);
     }
 
-    // COMANDO POSTULE
-    if (cmd === 'postule' || cmd === 'ya esta') {
+    // --- COMANDOS DE CIERRE ---
+    
+    // 1. Sin acento
+    if (cmd === 'postule') {
         message.reply(`🔴Gracias por postular los resultados se darán los próximos días por el canal de ⁠📢┃𝐀𝐧𝐮𝐧𝐜𝐢𝐨s 🔴`);
     }
 
-}); // Cierre del client.on
+    // --------------------------
+
+}); // Cierre correcto de client.on
 
 // INICIO DEL BOT
 client.login(process.env.TOKEN);
