@@ -33,15 +33,15 @@ client.on('messageCreate', (message) => {
     
     const cmd = message.content.toLowerCase().trim();
 
-    // COMANDO RESUMENDOWN (Actualizado a 1 hora exacta)
-    if (cmd === 'resumedown') {
+    // COMANDO RESUMENDOWN (Actualizado a 1 hora y protegido contra espacios invisibles)
+    if (cmd.includes('resumedown')) {
         message.reply('En 1 hora te aviso, si no estas te violo');
         setTimeout(() => {
             message.channel.send(`<@${message.author.id}> Rota el resumen nigga`);
-        }, 3600000); // 3,600,000 ms = 1 hora
+        }, 3600000); // 1 hora exacta (3,600,000 ms)
     }
 
-    if (cmd === 'pruebadown') {
+    if (cmd.includes('pruebadown')) {
         message.reply('Prueba iniciada, te aviso en 30 segundos...');
         setTimeout(() => {
             message.channel.send(`<@${message.author.id}> ¡La prueba de 30 segundos ha terminado!`);
