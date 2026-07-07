@@ -70,7 +70,7 @@ client.on('messageCreate', (message) => {
 
 // COMANDO RESUMENDOWN (Actualizado a 1 hora)
 
-if (cmd === 'resumendown') {
+if (cmd === '!resumen') {
 
     message.reply('En 1 hora te aviso, si no estas te violo');
 
