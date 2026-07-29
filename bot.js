@@ -35,12 +35,12 @@ client.on('messageCreate', (message) => {
 
     // COMANDO TITULODOWN (Nuevo: aviso recurrente cada 24 horas)
     if (cmd === 'titulodown') {
-        message.reply('Actualizar el titulo perras');
+        message.reply('En 24h te aviso para que cambies el titulo retrasado');
         
         // Ejecuta el aviso de forma indefinida cada 24 horas (86.400.000 ms)
         setInterval(() => {
-            message.channel.send(`<@${message.author.id}> ¡Recordatorio diario! Toca revisar el título.`);
-        }, 86400000);
+            message.channel.send(` Actualizar el titulo maricones <@&964247121811365988>`);
+        }, 864000000);
     }
 
     // COMANDO RESUMENDOWN (Actualizado a 1 hora)
