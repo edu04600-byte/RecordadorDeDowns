@@ -33,6 +33,16 @@ client.on('messageCreate', (message) => {
     
     const cmd = message.content.toLowerCase().trim();
 
+    // COMANDO TITULODOWN (Nuevo: aviso recurrente cada 24 horas)
+    if (cmd === 'titulodown') {
+        message.reply('Actualizar el titulo perras');
+        
+        // Ejecuta el aviso de forma indefinida cada 24 horas (86.400.000 ms)
+        setInterval(() => {
+            message.channel.send(`<@${message.author.id}> ¡Recordatorio diario! Toca revisar el título.`);
+        }, 86400000);
+    }
+
     // COMANDO RESUMENDOWN (Actualizado a 1 hora)
     if (cmd === 'resumendown') {
         message.reply('En 1 hora te aviso, si no estas te violo');
@@ -81,5 +91,5 @@ client.on('messageCreate', (message) => {
 
 }); // Cierre correcto de client.on
 
-// INICIO DEL BOT (Prueba primero con DISCORD_TOKEN y si no con TOKEN)
+// INICIO DEL BOT
 client.login(process.env.DISCORD_TOKEN || process.env.TOKEN);
