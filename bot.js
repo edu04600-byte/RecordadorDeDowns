@@ -7,7 +7,7 @@ const PORT = process.env.PORT || 10000;
 
 const DATOS_FILE = './tareas.json';
 const HORA_AVISO = 20;     // hora del aviso diario (hora de España)
-const MINUTO_AVISO = 30;   // minuto del aviso diario (20:30)
+const MINUTO_AVISO = 0;    // minuto del aviso diario (20:00)
 
 // Cada robo y cada cuántos días vuelve a estar disponible (cámbialos aquí si hace falta)
 const ROBOS = {
@@ -102,7 +102,7 @@ const client = new Client({
 client.once('ready', () => {
     console.log(`¡CONECTADO CON ÉXITO! Bot logueado como: ${client.user.tag}`);
 
-    // AVISO DIARIO A LAS 20:30: el bot avisa en el mismo canal donde escribiste el comando del robo, con @everyone
+    // AVISO DIARIO A LAS 20:00: el bot avisa en el mismo canal donde escribiste el comando del robo, con @everyone
     let ultimoAviso = null;
     setInterval(async () => {
         const ahora = ahoraMadrid();
@@ -207,7 +207,7 @@ client.on('messageCreate', (message) => {
         message.reply('Prueba iniciada, te aviso en 30 segundos...');
         setTimeout(() => {
             message.channel.send({
-                content: '¡La prueba de 30 segundos ha terminado!',
+                content: '@everyone ¡La prueba de 30 segundos ha terminado!',
                 allowedMentions: { parse: ['everyone'] }
             });
         }, 30000); // 30 segundos
