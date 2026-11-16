@@ -44,14 +44,14 @@ const RECORDATORIOS = {
         veces: 1,
         everyoneAlFinal: false,
         de: 'del duplicado',
-        inicio: 'Duplicado iniciado. Te aviso en 3 horas (1 solo aviso).'
+        inicio: 'Duplicado iniciado. Te aviso en 3 horas.'
     },
     duplicado2h: {
         cadaMs: 2 * 60 * 60 * 1000,
         veces: 1,
         everyoneAlFinal: false,
         de: 'del duplicado de 2h',
-        inicio: 'Duplicado de 2h iniciado. Te aviso en 2 horas (1 solo aviso).'
+        inicio: 'Duplicado de 2h iniciado. Te aviso en 2 horas.'
     }
 };
 
