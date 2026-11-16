@@ -253,27 +253,21 @@ client.on('messageCreate', (message) => {
         if (cmd === 'comandos') {
             return message.reply(`
 **📋 COMANDOS DE ROBOS**
-
-**🔫 ROBOS CADA 7 DÍAS**
-\`!gun\` - Gun
+    
+\`!gun\` - Gun Store
 \`!pawnshop\` - Pawnshop
 \`!subteraneo\` - Subteraneo
 \`!ayawaska\` - Ayawaska
 \`!yate\` - Yate
 \`!portaaviones\` - Portaaviones
-
-**⏱️ ROBOS POR HORAS**
-\`!mercachifle\` - Temporizador de 24 horas
-\`!bigtoni\` - Temporizador de 24 horas
-\`!weedrun\` - Temporizador de 8 horas. Al terminar avisa a @everyone.
+\`!mercachifle\` - mercachifle
+\`!bigtoni\` - bigtoni
+\`!weedrun\` - weedrun
 
 **📊 OTROS COMANDOS**
 \`!robos\` - Muestra el estado de todos tus robos y sus cooldowns.
 \`!clear nombre\` - Cancela el temporizador de un robo.
 
-**💡 IMPORTANTE**
-Cuando tires un robo, escribe su comando para iniciar el contador.
-Los avisos se envían una sola vez cuando termina el cooldown.
             `);
         }
 
