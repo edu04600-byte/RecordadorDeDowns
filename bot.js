@@ -256,7 +256,7 @@ client.on('messageCreate', (message) => {
 **📋 COMANDOS DE ROBOS**
     
 \`!gun\` - Gun Store
-\`!mecanico\` - Mecánico
+\`!mecanico\` - Robo al mecanico del norte
 \`!pawnshop\` - Pawnshop
 \`!subteraneo\` - Subteraneo
 \`!ayawaska\` - Ayawaska
