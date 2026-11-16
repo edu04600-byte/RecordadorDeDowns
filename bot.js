@@ -37,7 +37,7 @@ const RECORDATORIOS = {
         veces: 4,
         everyoneAlFinal: true,
         de: 'de la cosecha',
-        inicio: 'Cosecha iniciada. Te aviso cada 2 horas durante 8 horas (4 avisos) y el último con everyone.'
+        inicio: 'Cosecha iniciada. Te aviso cada 2 horas durante 8 horas (4 avisos).'
     },
     duplicado: {
         cadaMs: 3 * 60 * 60 * 1000,
@@ -373,9 +373,9 @@ client.on('messageCreate', (message) => {
 \`!weedrun\` - weedrun
 
 **🌱 AVISOS APARTE**
-\`!cosecha\` - Te avisa cada 2 horas durante 8 horas (4 avisos, el último con everyone).
-\`!duplicado\` - Te avisa en 3 horas (1 solo aviso).
-\`!duplicado2h\` - Te avisa en 2 horas (1 solo aviso).
+\`!cosecha\` - Avisa cada 2h 4 veces
+\`!duplicado\` - Para el duplicado normal
+\`!duplicado2h\` - Para el duplicado de 2 horas
 
 **📊 OTROS COMANDOS**
 \`!robos\` - Muestra el estado de todos tus robos y sus cooldowns.
