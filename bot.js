@@ -207,7 +207,7 @@ client.on('messageCreate', (message) => {
         message.reply('Prueba iniciada, te aviso en 30 segundos...');
         setTimeout(() => {
             message.channel.send({
-                content: '@everyone ¡La prueba de 30 segundos ha terminado!',
+                content: '¡La prueba de 30 segundos ha terminado!',
                 allowedMentions: { parse: ['everyone'] }
             });
         }, 30000); // 30 segundos
