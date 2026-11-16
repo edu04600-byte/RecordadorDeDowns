@@ -202,6 +202,17 @@ client.on('messageCreate', (message) => {
         }
     }
 
+    // --- PRUEBADOWN (prueba de 30 segundos, avisa a @everyone) ---
+    if (cmd === 'pruebadown') {
+        message.reply('Prueba iniciada, te aviso en 30 segundos...');
+        setTimeout(() => {
+            message.channel.send({
+                content: '@everyone ¡La prueba de 30 segundos ha terminado!',
+                allowedMentions: { parse: ['everyone'] }
+            });
+        }, 30000); // 30 segundos
+    }
+
     // --- RESUMENDOWN (1 hora) ---
     if (cmd === 'resumendown') {
         message.reply('En 1 hora te aviso, si no estas te violo');
