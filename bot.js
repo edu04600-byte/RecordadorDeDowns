@@ -28,22 +28,30 @@ const TEMPORIZADORES = {
 };
 
 // Avisos aparte (NO salen en !robos)
-// cosecha: te tagea cada 2 horas durante 8 horas (4 avisos) y el último avisa con 
+// cosecha: te tagea cada 2 horas durante 8 horas (4 avisos) y el último avisa con everyone
 // duplicado: te tagea una sola vez a las 3 horas
+// duplicado2h: te tagea una sola vez a las 2 horas
 const RECORDATORIOS = {
     cosecha: {
         cadaMs: 2 * 60 * 60 * 1000,
         veces: 4,
         everyoneAlFinal: true,
         de: 'de la cosecha',
-        inicio: 'Cosecha iniciada. Te aviso cada 2 horas durante 8 horas (4 avisos) Para cosechar.'
+        inicio: 'Cosecha iniciada. Te aviso cada 2 horas durante 8 horas (4 avisos) y el último con everyone.'
     },
     duplicado: {
         cadaMs: 3 * 60 * 60 * 1000,
         veces: 1,
         everyoneAlFinal: false,
         de: 'del duplicado',
-        inicio: 'Duplicado iniciado. Te aviso en 3 horas para el duplicado.'
+        inicio: 'Duplicado iniciado. Te aviso en 3 horas (1 solo aviso).'
+    },
+    duplicado2h: {
+        cadaMs: 2 * 60 * 60 * 1000,
+        veces: 1,
+        everyoneAlFinal: false,
+        de: 'del duplicado de 2h',
+        inicio: 'Duplicado de 2h iniciado. Te aviso en 2 horas (1 solo aviso).'
     }
 };
 
@@ -367,6 +375,7 @@ client.on('messageCreate', (message) => {
 **🌱 AVISOS APARTE**
 \`!cosecha\` - Te avisa cada 2 horas durante 8 horas (4 avisos, el último con everyone).
 \`!duplicado\` - Te avisa en 3 horas (1 solo aviso).
+\`!duplicado2h\` - Te avisa en 2 horas (1 solo aviso).
 
 **📊 OTROS COMANDOS**
 \`!robos\` - Muestra el estado de todos tus robos y sus cooldowns.
