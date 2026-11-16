@@ -13,6 +13,7 @@ const MINUTO_AVISO = 0;
 // Robos que avisan a las 20:00 cada 7 días
 const ROBOS = {
     gun: 7,
+    mecanico: 7,
     pawnshop: 7,
     subteraneo: 7,
     ayawaska: 7,
@@ -255,6 +256,7 @@ client.on('messageCreate', (message) => {
 **📋 COMANDOS DE ROBOS**
     
 \`!gun\` - Gun Store
+\`!mecanico\` - Mecánico
 \`!pawnshop\` - Pawnshop
 \`!subteraneo\` - Subteraneo
 \`!ayawaska\` - Ayawaska
@@ -368,7 +370,7 @@ client.on('messageCreate', (message) => {
                 : `En ${horas} horas exactas te aviso para el ${cmd}. Cuando lo vuelvas a hacer tira !${cmd} otra vez para reiniciar el contador.`);
         }
 
-        // !GUN, !YATE, ETC.
+        // !GUN, !MECANICO, !YATE, ETC.
         if (esRobo(cmd)) {
             const datos = cargarDatos();
             const misRobos = datos.usuarios[userId] || {};
