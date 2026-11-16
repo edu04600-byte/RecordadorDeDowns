@@ -23,7 +23,8 @@ const ROBOS = {
 // Robos con horas exactas desde que los tiras. Avisan solo a quien los tiró (una vez).
 const TEMPORIZADORES = {
     mercachifle: 24 * 60 * 60 * 1000,
-    bigtoni: 24 * 60 * 60 * 1000
+    bigtoni: 24 * 60 * 60 * 1000,
+    weedrun: 8 * 60 * 60 * 1000
 };
 
 // Si ya había robos guardados con los nombres antiguos, se pasan solos a los nuevos
@@ -174,7 +175,7 @@ client.once('ready', () => {
         }
     }, 20000); // revisa cada 20 s; ultimoAviso evita enviarlo dos veces el mismo día
 
-    // AVISO TEMPORIZADORES (mercachifle, bigtoni): horas exactas desde que se tiró, etiqueta SOLO a quien lo tiró (una vez)
+    // AVISO TEMPORIZADORES (mercachifle, bigtoni, weedrun): horas exactas desde que se tiró, etiqueta SOLO a quien lo tiró (una vez)
     setInterval(async () => {
         const datos = cargarDatos();
         const ahora = Date.now();
@@ -236,7 +237,7 @@ client.on('messageCreate', (message) => {
                 return `❌ ${nombre}: CD ${faltan} ${faltan === 1 ? 'día' : 'días'}${hora}`;
             });
 
-            // Temporizadores de horas (mercachifle, bigtoni). La hora a la que se tiró = proximo - duración
+            // Temporizadores de horas (mercachifle, bigtoni, weedrun). La hora a la que se tiró = proximo - duración
             for (const [nombre, dur] of Object.entries(TEMPORIZADORES)) {
                 const t = misRobos[nombre];
                 const horaT = t && t.proximo ? ` | tirado ${formatearHora(t.proximo - dur)}` : '';
@@ -266,7 +267,7 @@ client.on('messageCreate', (message) => {
             return message.reply(`El temporizador de !${nombre} se ha eliminado, tíralo de nuevo para que funcione`);
         }
 
-        // !mercachifle, !bigtoni -> empieza a contar las horas exactas y te etiqueta a ti cuando pasen (una vez)
+        // !mercachifle, !bigtoni, !weedrun -> empieza a contar las horas exactas y te etiqueta a ti cuando pasen (una vez)
         if (esTemporizador(cmd)) {
             const datos = cargarDatos();
             const misRobos = datos.usuarios[userId] || {};
