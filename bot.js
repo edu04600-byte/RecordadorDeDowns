@@ -9,16 +9,18 @@ const DATOS_FILE = './tareas.json';
 const HORA_AVISO = 20;     // hora del aviso diario (hora de España)
 const MINUTO_AVISO = 0;    // minuto del aviso diario (20:00)
 
-// Cada robo y cada cuántos días vuelve a estar disponible (cámbialos aquí si hace falta)
+// Robos que avisan a las 20:00 y cada cuántos días vuelven a estar disponibles
 const ROBOS = {
     gun: 7,
     maritimo: 7,
     almacen: 7,
     pawnshop: 7,
     subteraneo: 7,
-    cayo: 7,
-    mercachifle: 7
+    cayo: 7
 };
+
+// Mercachifle va aparte: 24 horas exactas desde que lo tiras, avisa solo a quien lo tiró
+const MERCACHIFLE_MS = 24 * 60 * 60 * 1000;
 
 // Si ya había robos guardados con los nombres antiguos, se pasan solos a los nuevos
 const RENOMBRES = {
@@ -27,8 +29,7 @@ const RENOMBRES = {
     robo3: 'almacen',
     robo4: 'pawnshop',
     robo5: 'subteraneo',
-    robo6: 'cayo',
-    robo7: 'mercachifle'
+    robo6: 'cayo'
 };
 
 // ================== FUNCIONES ==================
@@ -52,7 +53,15 @@ function diasEntre(a, b) {
     return Math.round((Date.UTC(yb, mb - 1, db) - Date.UTC(ya, ma - 1, da)) / 86400000);
 }
 
-// Estructura: { usuarios: { "idDelUsuario": { gun: { ultima: "YYYY-MM-DD", activa: true, canal: "id" }, ... } } }
+// Convierte milisegundos en "5h 12min"
+function formatearTiempo(ms) {
+    const totalMin = Math.max(1, Math.ceil(ms / 60000));
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return h > 0 ? `${h}h ${m}min` : `${m}min`;
+}
+
+// Estructura: { usuarios: { "idDelUsuario": { gun: { ultima: "YYYY-MM-DD", activa: true, canal: "id" }, mercachifle: { proximo: 1700000000000, activa: true, canal: "id" } } } }
 // Cada persona del servidor tiene sus propios robos.
 function cargarDatos() {
     try {
@@ -140,6 +149,37 @@ client.once('ready', () => {
             }
         }
     }, 20000); // revisa cada 20 s; ultimoAviso evita enviarlo dos veces el mismo día
+
+    // AVISO MERCACHIFLE: 24h exactas desde que se tiró, etiqueta SOLO a quien lo tiró
+    setInterval(async () => {
+        const datos = cargarDatos();
+        const ahora = Date.now();
+        const pendientes = [];
+
+        for (const [userId, misRobos] of Object.entries(datos.usuarios)) {
+            const r = misRobos.mercachifle;
+            if (!r || !r.activa || !r.proximo || !r.canal) continue;
+            if (ahora < r.proximo) continue;
+            r.activa = false; // se marca antes de enviar para que no se repita
+            pendientes.push({ userId, canalId: r.canal });
+        }
+
+        if (pendientes.length === 0) return;
+        guardarDatos(datos);
+
+        for (const { userId, canalId } of pendientes) {
+            try {
+                const canal = await client.channels.fetch(canalId);
+                await canal.send({
+                    content: `<@${userId}> Ya puedes hacer el mercachifle`,
+                    allowedMentions: { users: [userId] }
+                });
+            } catch (e) {
+                console.error(`No pude avisar del mercachifle en el canal ${canalId}:`, e.message);
+            }
+            await esperar(1000);
+        }
+    }, 10000); // revisa cada 10 s
 });
 
 client.on('messageCreate', (message) => {
@@ -168,13 +208,23 @@ client.on('messageCreate', (message) => {
                     ? `⚠️ ${nombre}: ya puedes (hecho hace ${d} días)`
                     : `✅ ${nombre}: te faltan ${ROBOS[nombre] - d} días`;
             });
+
+            // Mercachifle (en horas)
+            const m = misRobos.mercachifle;
+            if (!m || !m.activa || !m.proximo) {
+                lineas.push('⏹️ mercachifle: parado');
+            } else {
+                lineas.push(`✅ mercachifle: te faltan ${formatearTiempo(m.proximo - Date.now())}`);
+            }
+
             return message.reply(lineas.join('\n'));
         }
 
         // !clear gun -> para ese robo (no te avisa más hasta que escribas !gun)
         if (cmd.startsWith('clear ')) {
             const nombre = cmd.slice(6).trim().replace(/^!/, '');
-            if (!esRobo(nombre)) return message.reply(`Ese robo no existe. Usa: ${Object.keys(ROBOS).join(', ')}`);
+            const todos = [...Object.keys(ROBOS), 'mercachifle'];
+            if (!todos.includes(nombre)) return message.reply(`Ese robo no existe. Usa: ${todos.join(', ')}`);
 
             const datos = cargarDatos();
             const misRobos = datos.usuarios[userId] || {};
@@ -184,6 +234,25 @@ client.on('messageCreate', (message) => {
             datos.usuarios[userId] = misRobos;
             guardarDatos(datos);
             return message.reply(`El temporizador de !${nombre} se ha eliminado, tíralo de nuevo para que funcione`);
+        }
+
+        // !mercachifle -> empieza a contar 24h exactas y te etiqueta a ti cuando pasen
+        if (cmd === 'mercachifle') {
+            const datos = cargarDatos();
+            const misRobos = datos.usuarios[userId] || {};
+            const yaActivo = misRobos.mercachifle && misRobos.mercachifle.activa;
+
+            misRobos.mercachifle = {
+                proximo: Date.now() + MERCACHIFLE_MS,
+                activa: true,
+                canal: message.channel.id
+            };
+            datos.usuarios[userId] = misRobos;
+            guardarDatos(datos);
+
+            return message.reply(yaActivo
+                ? 'Hecho ✅ mercachifle. Reinicio el contador, te aviso en 24 horas exactas'
+                : 'En 24 horas exactas te aviso para el mercachifle (si no se hace, !clear mercachifle y tiras !mercachifle cuando lo hagas)');
         }
 
         // !gun, !maritimo, !almacen... -> apunta que has hecho ese robo HOY y empieza a contar (avisará en este mismo canal)
