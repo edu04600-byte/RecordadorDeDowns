@@ -6,20 +6,23 @@ const fs = require('fs');
 const PORT = process.env.PORT || 10000;
 
 const DATOS_FILE = './tareas.json';
-const HORA_AVISO = 20;     // hora del aviso diario (hora de España)
-const MINUTO_AVISO = 0;    // minuto del aviso diario (20:00)
+const HORA_AVISO = 20;     // hora del aviso (hora de España)
+const MINUTO_AVISO = 0;    // minuto del aviso (20:00)
 
-// Robos que avisan a las 20:00 y cada cuántos días vuelven a estar disponibles
+// Robos que avisan a las 20:00 y a los cuántos días. Avisan UNA sola vez por cada vez que los tiras.
 const ROBOS = {
     gun: 7,
     maritimo: 7,
     almacen: 7,
     pawnshop: 7,
     subteraneo: 7,
-    cayo: 7
+    cayo: 7,
+    ayawaska: 7,
+    yate: 7,
+    portaaviones: 7
 };
 
-// Mercachifle va aparte: 24 horas exactas desde que lo tiras, avisa solo a quien lo tiró
+// Mercachifle va aparte: 24 horas exactas desde que lo tiras, avisa solo a quien lo tiró (una vez)
 const MERCACHIFLE_MS = 24 * 60 * 60 * 1000;
 
 // Si ya había robos guardados con los nombres antiguos, se pasan solos a los nuevos
@@ -61,7 +64,21 @@ function formatearTiempo(ms) {
     return h > 0 ? `${h}h ${m}min` : `${m}min`;
 }
 
-// Estructura: { usuarios: { "idDelUsuario": { gun: { ultima: "YYYY-MM-DD", activa: true, canal: "id" }, mercachifle: { proximo: 1700000000000, activa: true, canal: "id" } } } }
+// Convierte un momento (ms) en "16/11 16:03" (hora de España)
+function formatearHora(ms) {
+    const p = {};
+    new Intl.DateTimeFormat('es-ES', {
+        timeZone: 'Europe/Madrid',
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    }).formatToParts(new Date(ms)).forEach(x => { p[x.type] = x.value; });
+    return `${p.day}/${p.month} ${p.hour}:${p.minute}`;
+}
+
+// Estructura: { usuarios: { "idDelUsuario": { gun: { ultima: "YYYY-MM-DD", tirado: 1700000000000, activa: true, canal: "id" }, mercachifle: { proximo: 1700000000000, activa: true, canal: "id" } } } }
 // Cada persona del servidor tiene sus propios robos.
 function cargarDatos() {
     try {
@@ -111,7 +128,7 @@ const client = new Client({
 client.once('ready', () => {
     console.log(`¡CONECTADO CON ÉXITO! Bot logueado como: ${client.user.tag}`);
 
-    // AVISO DIARIO A LAS 20:00: el bot avisa en el mismo canal donde escribiste el comando del robo, con @everyone
+    // AVISO A LAS 20:00: avisa UNA vez de cada robo que ya toca, en el canal donde lo tiraste, con @everyone
     let ultimoAviso = null;
     setInterval(async () => {
         const ahora = ahoraMadrid();
@@ -123,15 +140,19 @@ client.once('ready', () => {
 
         const datos = cargarDatos();
 
-        // Junta los robos pendientes de todos, agrupados por el canal donde se arrancaron
+        // Junta los robos pendientes de todos, agrupados por canal, y los marca como avisados (paran solos)
         const porCanal = {};
+        let cambios = false;
         for (const misRobos of Object.values(datos.usuarios)) {
             for (const [nombre, r] of Object.entries(misRobos)) {
                 if (!esRobo(nombre) || !r.activa || !r.canal) continue;
                 if (diasEntre(r.ultima, hoy) < ROBOS[nombre]) continue;
                 (porCanal[r.canal] = porCanal[r.canal] || new Set()).add(nombre);
+                r.activa = false; // ya no vuelve a avisar hasta que lo tires otra vez
+                cambios = true;
             }
         }
+        if (cambios) guardarDatos(datos);
 
         // Un mensaje por cada robo pendiente: "Hoy tienes que hacer el gun @everyone"
         for (const [canalId, nombres] of Object.entries(porCanal)) {
@@ -150,7 +171,7 @@ client.once('ready', () => {
         }
     }, 20000); // revisa cada 20 s; ultimoAviso evita enviarlo dos veces el mismo día
 
-    // AVISO MERCACHIFLE: 24h exactas desde que se tiró, etiqueta SOLO a quien lo tiró
+    // AVISO MERCACHIFLE: 24h exactas desde que se tiró, etiqueta SOLO a quien lo tiró (una vez)
     setInterval(async () => {
         const datos = cargarDatos();
         const ahora = Date.now();
@@ -194,7 +215,7 @@ client.on('messageCreate', (message) => {
     if (tieneBang) {
         const userId = message.author.id;
 
-        // !robos -> tus robos y cuántos días te faltan en cada uno
+        // !robos -> ✅ Disponible o ❌ con el CD que le falta, y a la derecha la hora a la que lo tiraste
         if (cmd === 'robos') {
             const datos = cargarDatos();
             const misRobos = datos.usuarios[userId] || {};
@@ -202,25 +223,27 @@ client.on('messageCreate', (message) => {
 
             const lineas = Object.keys(ROBOS).map(nombre => {
                 const r = misRobos[nombre];
-                if (!r || !r.activa) return `⏹️ ${nombre}: parado`;
+                const hora = r && r.tirado ? ` | tirado ${formatearHora(r.tirado)}` : '';
+                if (!r || !r.activa) return `✅ ${nombre}: Disponible${hora}`;
                 const d = diasEntre(r.ultima, hoy);
-                return d >= ROBOS[nombre]
-                    ? `⚠️ ${nombre}: ya puedes (hecho hace ${d} días)`
-                    : `✅ ${nombre}: te faltan ${ROBOS[nombre] - d} días`;
+                if (d >= ROBOS[nombre]) return `✅ ${nombre}: Disponible${hora}`;
+                const faltan = ROBOS[nombre] - d;
+                return `❌ ${nombre}: CD ${faltan} ${faltan === 1 ? 'día' : 'días'}${hora}`;
             });
 
-            // Mercachifle (en horas)
+            // Mercachifle (en horas). La hora a la que se tiró = proximo - 24h
             const m = misRobos.mercachifle;
-            if (!m || !m.activa || !m.proximo) {
-                lineas.push('⏹️ mercachifle: parado');
+            const horaM = m && m.proximo ? ` | tirado ${formatearHora(m.proximo - MERCACHIFLE_MS)}` : '';
+            if (!m || !m.activa || !m.proximo || Date.now() >= m.proximo) {
+                lineas.push(`✅ mercachifle: Disponible${horaM}`);
             } else {
-                lineas.push(`✅ mercachifle: te faltan ${formatearTiempo(m.proximo - Date.now())}`);
+                lineas.push(`❌ mercachifle: CD ${formatearTiempo(m.proximo - Date.now())}${horaM}`);
             }
 
             return message.reply(lineas.join('\n'));
         }
 
-        // !clear gun -> para ese robo (no te avisa más hasta que escribas !gun)
+        // !clear gun -> cancela ese aviso (no te avisa hasta que escribas !gun otra vez)
         if (cmd.startsWith('clear ')) {
             const nombre = cmd.slice(6).trim().replace(/^!/, '');
             const todos = [...Object.keys(ROBOS), 'mercachifle'];
@@ -236,7 +259,7 @@ client.on('messageCreate', (message) => {
             return message.reply(`El temporizador de !${nombre} se ha eliminado, tíralo de nuevo para que funcione`);
         }
 
-        // !mercachifle -> empieza a contar 24h exactas y te etiqueta a ti cuando pasen
+        // !mercachifle -> empieza a contar 24h exactas y te etiqueta a ti cuando pasen (una vez)
         if (cmd === 'mercachifle') {
             const datos = cargarDatos();
             const misRobos = datos.usuarios[userId] || {};
@@ -252,22 +275,27 @@ client.on('messageCreate', (message) => {
 
             return message.reply(yaActivo
                 ? 'Hecho ✅ mercachifle. Reinicio el contador, te aviso en 24 horas exactas'
-                : 'En 24 horas exactas te aviso para el mercachifle (si no se hace, !clear mercachifle y tiras !mercachifle cuando lo hagas)');
+                : 'En 24 horas exactas te aviso para el mercachifle (solo te aviso 1 vez, cuando lo vuelvas a hacer tira !mercachifle otra vez)');
         }
 
-        // !gun, !maritimo, !almacen... -> apunta que has hecho ese robo HOY y empieza a contar (avisará en este mismo canal)
+        // !gun, !maritimo, !yate... -> apunta que has hecho ese robo HOY y te avisa UNA vez cuando toque (en este mismo canal)
         if (esRobo(cmd)) {
             const datos = cargarDatos();
             const misRobos = datos.usuarios[userId] || {};
             const yaActivo = misRobos[cmd] && misRobos[cmd].activa;
 
-            misRobos[cmd] = { ultima: hoyStr(), activa: true, canal: message.channel.id };
+            misRobos[cmd] = {
+                ultima: hoyStr(),
+                tirado: Date.now(), // momento exacto en que lo tiraste
+                activa: true,
+                canal: message.channel.id
+            };
             datos.usuarios[userId] = misRobos;
             guardarDatos(datos);
 
             return message.reply(yaActivo
-                ? `Hecho ✅ ${cmd}. Te aviso de nuevo en ${ROBOS[cmd]} días`
-                : `En ${ROBOS[cmd]} dias te aviso para el ${cmd}, (si no se hace el robo, !clear ${cmd} y tiras el comando de !${cmd} cuando lo hagas)`);
+                ? `Hecho ✅ ${cmd}. Reinicio el contador, te aviso en ${ROBOS[cmd]} días`
+                : `En ${ROBOS[cmd]} días te aviso para el ${cmd} (solo te aviso 1 vez, cuando lo vuelvas a hacer tira !${cmd} otra vez, o !clear ${cmd} para cancelar)`);
         }
     }
 
