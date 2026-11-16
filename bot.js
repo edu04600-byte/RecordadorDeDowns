@@ -28,7 +28,7 @@ const TEMPORIZADORES = {
 };
 
 // Avisos aparte (NO salen en !robos)
-// cosecha: te tagea cada 2 horas durante 8 horas (4 avisos) y el último avisa con everyone
+// cosecha: te tagea cada 2 horas durante 8 horas (4 avisos) y el último avisa con 
 // duplicado: te tagea una sola vez a las 3 horas
 const RECORDATORIOS = {
     cosecha: {
@@ -36,14 +36,14 @@ const RECORDATORIOS = {
         veces: 4,
         everyoneAlFinal: true,
         de: 'de la cosecha',
-        inicio: 'Cosecha iniciada. Te aviso cada 2 horas durante 8 horas (4 avisos) y el último con everyone.'
+        inicio: 'Cosecha iniciada. Te aviso cada 2 horas durante 8 horas (4 avisos) Para cosechar.'
     },
     duplicado: {
         cadaMs: 3 * 60 * 60 * 1000,
         veces: 1,
         everyoneAlFinal: false,
         de: 'del duplicado',
-        inicio: 'Duplicado iniciado. Te aviso en 3 horas (1 solo aviso).'
+        inicio: 'Duplicado iniciado. Te aviso en 3 horas para el duplicado.'
     }
 };
 
