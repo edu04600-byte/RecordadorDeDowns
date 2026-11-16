@@ -1,4 +1,3 @@
-
 const { Client, GatewayIntentBits } = require('discord.js');
 const http = require('http');
 const fs = require('fs');
@@ -28,6 +27,31 @@ const TEMPORIZADORES = {
     weedrun: 8 * 60 * 60 * 1000
 };
 
+// Avisos aparte (NO salen en !robos)
+// cosecha: te tagea cada 2 horas durante 8 horas (4 avisos) y el último avisa con everyone
+// duplicado: te tagea una sola vez a las 3 horas
+const RECORDATORIOS = {
+    cosecha: {
+        cadaMs: 2 * 60 * 60 * 1000,
+        veces: 4,
+        everyoneAlFinal: true,
+        de: 'de la cosecha',
+        inicio: 'Cosecha iniciada. Te aviso cada 2 horas durante 8 horas (4 avisos) y el último con everyone.'
+    },
+    duplicado: {
+        cadaMs: 3 * 60 * 60 * 1000,
+        veces: 1,
+        everyoneAlFinal: false,
+        de: 'del duplicado',
+        inicio: 'Duplicado iniciado. Te aviso en 3 horas (1 solo aviso).'
+    }
+};
+
+// Otros nombres con los que se puede escribir un comando
+const ALIAS = {
+    cosechado: 'cosecha'
+};
+
 // Nombres antiguos
 const RENOMBRES = {
     robo1: 'gun',
@@ -42,6 +66,14 @@ function esRobo(nombre) {
 
 function esTemporizador(nombre) {
     return Object.prototype.hasOwnProperty.call(TEMPORIZADORES, nombre);
+}
+
+function esRecordatorio(nombre) {
+    return Object.prototype.hasOwnProperty.call(RECORDATORIOS, nombre);
+}
+
+function nombreReal(nombre) {
+    return Object.prototype.hasOwnProperty.call(ALIAS, nombre) ? ALIAS[nombre] : nombre;
 }
 
 function ahoraMadrid() {
@@ -234,6 +266,72 @@ client.once('ready', () => {
             await esperar(1000);
         }
     }, 10000);
+
+    // AVISOS DE COSECHA Y DUPLICADO
+    // Los avisos normales etiquetan al usuario que tiró el comando
+    // El último aviso de la cosecha etiqueta a everyone
+    setInterval(async () => {
+        const datos = cargarDatos();
+        const ahora = Date.now();
+        const pendientes = [];
+
+        for (const [userId, misRobos] of Object.entries(datos.usuarios)) {
+            for (const [nombre, conf] of Object.entries(RECORDATORIOS)) {
+                const r = misRobos[nombre];
+
+                if (!r || !r.activa || !r.proximo || !r.canal) continue;
+                if (ahora < r.proximo) continue;
+
+                r.enviados = (r.enviados || 0) + 1;
+                const esUltimo = r.enviados >= conf.veces;
+
+                if (esUltimo) {
+                    r.activa = false;
+                } else {
+                    // Si el bot estuvo apagado, no mandar todos los avisos atrasados de golpe
+                    r.proximo = Math.max(r.proximo + conf.cadaMs, ahora + 60000);
+                }
+
+                pendientes.push({ userId, nombre, canalId: r.canal, n: r.enviados, esUltimo });
+            }
+        }
+
+        if (pendientes.length === 0) return;
+
+        guardarDatos(datos);
+
+        for (const { userId, nombre, canalId, n, esUltimo } of pendientes) {
+            const conf = RECORDATORIOS[nombre];
+            const horas = (n * conf.cadaMs) / 3600000;
+
+            let mensaje;
+            if (esUltimo && conf.everyoneAlFinal) {
+                mensaje = {
+                    content: `@everyone Último aviso ${conf.de} (${n}/${conf.veces}, han pasado ${horas}h)`,
+                    allowedMentions: { parse: ['everyone'] }
+                };
+            } else if (conf.veces > 1) {
+                mensaje = {
+                    content: `<@${userId}> Aviso ${n}/${conf.veces} ${conf.de} (han pasado ${horas}h)`,
+                    allowedMentions: { users: [userId] }
+                };
+            } else {
+                mensaje = {
+                    content: `<@${userId}> Han pasado ${horas} horas ${conf.de}`,
+                    allowedMentions: { users: [userId] }
+                };
+            }
+
+            try {
+                const canal = await client.channels.fetch(canalId);
+                await canal.send(mensaje);
+            } catch (e) {
+                console.error(`No pude avisar ${conf.de} en el canal ${canalId}:`, e.message);
+            }
+
+            await esperar(1000);
+        }
+    }, 10000);
 });
 
 // ================== COMANDOS ==================
@@ -265,6 +363,10 @@ client.on('messageCreate', (message) => {
 \`!mercachifle\` - mercachifle
 \`!bigtoni\` - bigtoni
 \`!weedrun\` - weedrun
+
+**🌱 AVISOS APARTE**
+\`!cosecha\` - Te avisa cada 2 horas durante 8 horas (4 avisos, el último con everyone).
+\`!duplicado\` - Te avisa en 3 horas (1 solo aviso).
 
 **📊 OTROS COMANDOS**
 \`!robos\` - Muestra el estado de todos tus robos y sus cooldowns.
@@ -320,11 +422,12 @@ client.on('messageCreate', (message) => {
 
         // !CLEAR NOMBRE
         if (cmd.startsWith('clear ')) {
-            const nombre = cmd.slice(6).trim().replace(/^!/, '');
+            const nombre = nombreReal(cmd.slice(6).trim().replace(/^!/, ''));
 
             const todos = [
                 ...Object.keys(ROBOS),
-                ...Object.keys(TEMPORIZADORES)
+                ...Object.keys(TEMPORIZADORES),
+                ...Object.keys(RECORDATORIOS)
             ];
 
             if (!todos.includes(nombre)) {
@@ -346,6 +449,27 @@ client.on('messageCreate', (message) => {
             return message.reply(
                 `El temporizador de !${nombre} se ha eliminado, tíralo de nuevo para que funcione`
             );
+        }
+
+        // !COSECHA (también !cosechado), !DUPLICADO
+        const nombreRec = nombreReal(cmd);
+        if (esRecordatorio(nombreRec)) {
+            const conf = RECORDATORIOS[nombreRec];
+            const datos = cargarDatos();
+            const misRobos = datos.usuarios[userId] || {};
+            const yaActivo = misRobos[nombreRec] && misRobos[nombreRec].activa;
+
+            misRobos[nombreRec] = {
+                proximo: Date.now() + conf.cadaMs,
+                enviados: 0,
+                activa: true,
+                canal: message.channel.id
+            };
+
+            datos.usuarios[userId] = misRobos;
+            guardarDatos(datos);
+
+            return message.reply(`${yaActivo ? 'Reinicio el contador. ' : ''}${conf.inicio}`);
         }
 
         // !MERCACHIFLE, !BIGTONI, !WEEDRUN
