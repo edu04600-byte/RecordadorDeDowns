@@ -18,7 +18,8 @@ const ROBOS = {
     subteraneo: 7,
     ayawaska: 7,
     yate: 7,
-    portaaviones: 7
+    portaaviones: 7,
+    obreros: 7
 };
 
 // Robos con temporizadores de horas exactas
@@ -459,6 +460,7 @@ client.on('messageCreate', (message) => {
 \`!ayawaska\` - Ayawaska
 \`!yate\` - Yate
 \`!portaaviones\` - Portaaviones
+\`!obreros\` - Obreros
 \`!mercachifle\` - mercachifle
 \`!bigtoni\` - bigtoni
 \`!weedrun\` - weedrun
